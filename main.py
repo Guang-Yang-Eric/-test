@@ -3,7 +3,7 @@ import random
 
 import pygame
 from PySide6 import QtCore, QtGui, QtWidgets
-
+import os
 
 CELL_SIZE = 30
 GRID_WIDTH = 10
