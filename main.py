@@ -11,6 +11,7 @@ GRID_HEIGHT = 20
 WINDOW_WIDTH = GRID_WIDTH * CELL_SIZE
 WINDOW_HEIGHT = GRID_HEIGHT * CELL_SIZE
 TICK_MS = 500
+SCORE_PER_LINE = 100
 
 SHAPES = [
     [[[1, 1, 1, 1]], [[1], [1], [1], [1]]],
@@ -42,6 +43,7 @@ class TetrisGame:
         self.rotation_index = 0
         self.position = [0, 0]
         self.game_over = False
+        self.score = 0
         self.spawn_piece()
 
     def spawn_piece(self):
@@ -90,6 +92,8 @@ class TetrisGame:
         while len(new_grid) < GRID_HEIGHT:
             new_grid.insert(0, [0 for _ in range(GRID_WIDTH)])
         self.grid = new_grid
+        if cleared:
+            self.score += cleared * SCORE_PER_LINE
         return cleared
 
     def move(self, dx, dy):
@@ -121,6 +125,10 @@ class TetrisWidget(QtWidgets.QWidget):
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.game = TetrisGame()
+        self.font = pygame.font.SysFont(
+            ["Digital-7", "Digital-7 Mono", "DS-Digital", "Courier New"],
+            22,
+        )
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_game)
         self.timer.start(TICK_MS)
@@ -148,6 +156,7 @@ class TetrisWidget(QtWidgets.QWidget):
         self.surface.fill((20, 20, 20))
         self.draw_grid()
         self.draw_piece()
+        self.draw_score()
         if self.game.game_over:
             self.draw_game_over()
         image = self.surface_to_image()
@@ -190,6 +199,10 @@ class TetrisWidget(QtWidgets.QWidget):
         text = font.render("Game Over - Press R to Restart", True, (255, 255, 255))
         rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
         self.surface.blit(text, rect)
+
+    def draw_score(self):
+        score_text = self.font.render(f"SCORE {self.game.score:05d}", True, (0, 255, 150))
+        self.surface.blit(score_text, (8, 6))
 
     def surface_to_image(self):
         raw = pygame.image.tostring(self.surface, "RGB")
